@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>에듀피셔 16가지 학습성향 검사</title>
+  <style>
+    :root{
+      --bg:#0f172a; /* slate-900 */
+      --card:#111827; /* gray-900 */
+      --muted:#94a3b8; /* slate-400 */
+      --text:#e5e7eb; /* gray-200 */
+      --accent:#60a5fa; /* blue-400 */
+      --accent2:#22d3ee; /* cyan-400 */
+      --ok:#34d399; /* emerald-400 */
+      --warn:#f59e0b; /* amber-500 */
+      --danger:#fb7185; /* rose-400 */
+      --shadow: 0 10px 25px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(160deg,#0b1024,#0f172a,#0b1024);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;}
+    .container{max-width:960px;margin:0 auto;padding:28px}
+    header{display:flex;gap:16px;align-items:center;margin:12px 0 22px}
+    header .logo{width:48px;height:48px;border-radius:12px;background:radial-gradient(circle at 30% 30%,#ffe4a3,#f59e0b 40%,#7c3aed 70%);box-shadow:var(--shadow)}
+    h1{font-size: clamp(22px, 4vw, 32px);margin:0}
+    p.subtitle{margin:6px 0 0;color:var(--muted)}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.06);backdrop-filter: blur(6px);padding:20px;border-radius:var(--radius);box-shadow:var(--shadow)}
+    .grid{display:grid;gap:16px}
+    @media (min-width: 800px){.grid.two{grid-template-columns:1.2fr .8fr}}
+    .hint{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.12);padding:14px;border-radius:14px}
+    .hint .emoji{font-size:22px}
+    input[type="text"], select{width:100%;padding:14px 16px;border-radius:14px;border:1px solid rgba(255,255,255,0.1);background:#0b1024;color:var(--text)}
+    .btn{display:inline-flex;gap:8px;align-items:center;justify-content:center;padding:12px 18px;border-radius:14px;border:0;cursor:pointer;color:#0b1024;background:linear-gradient(135deg,var(--accent),var(--accent2));font-weight:700;box-shadow:var(--shadow)}
+    .btn.secondary{background:rgba(255,255,255,0.08);color:var(--text);border:1px solid rgba(255,255,255,0.14)}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+    .progress{height:10px;background:rgba(255,255,255,0.08);border-radius:999px;overflow:hidden}
+    .progress>div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%}
+    .q{padding:16px;border-radius:14px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03)}
+    .q h3{margin:0 0 8px;font-size:16px}
+    .badge{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,0.12);padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.04);color:var(--muted)}
+    .result-type{font-weight:800;font-size:24px}
+    .result-card{display:grid;gap:12px}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(96,165,250,.2);border:1px solid rgba(96,165,250,.35);color:#cfe7ff;font-size:12px}
+    footer{margin:40px 0 10px;color:var(--muted);text-align:center;font-size:12px}
+    .hidden{display:none !important}
+    /* Axis bars */
+    .axis-bar{display:flex;position:relative;height:24px;border-radius:12px;overflow:hidden;margin:6px 0}
+    .axis-left{background:linear-gradient(90deg,#34d399,#10b981);text-align:right;padding-right:6px;color:#fff;font-weight:700;line-height:24px}
+    .axis-right{background:linear-gradient(90deg,#6366f1,#8b5cf6);text-align:left;padding-left:6px;color:#fff;font-weight:700;line-height:24px}
+    .axis-midline{position:absolute;left:50%;top:0;bottom:0;width:2px;background:rgba(255,255,255,0.25);mix-blend-mode:overlay}
+    .axis-foot{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted);margin-top:4px}
+    .axis-chip{display:inline-flex;gap:6px;align-items:center;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12)}
+    .axis-flag{font-weight:700;border-color:rgba(255,255,255,0.28)!important}
+    /* Choice UI for 밸런스게임 */
+    .choice-wrap{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+    .choice-wrap label{display:flex;align-items:center;gap:8px;padding:10px;border-radius:12px;background:rgba(255,255,255,0.04);cursor:pointer;transition:0.2s;}
+    .choice-wrap input[type="radio"]{accent-color:#0b1e5b;}
+    .choice-wrap label:hover{background:rgba(255,255,255,0.1)}
+    /* Result blur & overlay CTA */
+    .blur-wrap{position:relative}
+    .is-blurred{filter:blur(6px);pointer-events:none;user-select:none}
+    .blur-cover{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(15,23,42,.55),rgba(15,23,42,.8));border-radius:var(--radius);border:1px dashed rgba(255,255,255,.24);backdrop-filter: blur(4px);z-index:1}
+    .lead-card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(520px,92%);background:#ffffff;color:#0f172a;border-radius:16px;box-shadow:var(--shadow);padding:18px;border:1px solid rgba(0,0,0,.08);z-index:2}
+    .lead-card h3{margin:0 0 10px;font-size:18px;color:#0f172a}
+    .lead-card p{margin:0 0 12px;color:#334155}
+    .lead-card .field{display:flex;flex-direction:column;gap:6px}
+    .lead-card input[type="text"], .lead-card input[type="tel"], .lead-card input[type="password"], .lead-card select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(0,0,0,.15);background:#fff;color:#0f172a}
+    .lead-card .btn{width:100%}
+    .lead-card .btn.secondary{background:#eef2ff;color:#111827;border:1px solid rgba(0,0,0,.12)}
+    .overlay-box{max-width:560px;margin:0 auto;padding:22px;border-radius:16px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.2);box-shadow:var(--shadow);text-align:center}
+    .overlay-box h3{margin:0 0 10px;font-size:18px}
+    .overlay-box p{margin:0 0 14px;color:var(--text);opacity:.9}
+    .overlay-box .btn{width:100%;}
+/* 상담방법(전화/카카오톡/방문) 글씨 네이비 */
+.lead-card .pill label,
+.lead-card .pill span {
+  color: #0b1e5b !important;
+  font-weight: 600;
+}
+
+/* 선택됐을 때 배경 및 글씨색 */
+.lead-card .pill input:checked + span {
+  background-color: #c7d2fe;
+  color: #0a1a44;
+  border-color: #94a3f9;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1>에듀피셔 16가지 학습성향 테스트</h1>
+        <p class="subtitle">이름을 입력하고 문항에 답하면 16가지 조합으로 결과가 나옵니다. 결과 페이지에서 맞춤 루틴과 코칭 포인트를 제공합니다.</p>
+      </div>
+    </header>
+
+    <!-- Intro Card -->
+    <section id="intro" class="card grid two">
+      <div class="grid">
+        <div class="hint"><span class="emoji">🔎</span><div>이 검사는 학습 성향을 이해하고, 자녀에게 맞는 공부법을 찾도록 돕습니다.</div></div>
+        <div class="hint"><span class="emoji">🤝</span><div>강점/약점은 공존합니다. 본 결과는 내 아이의 고정된 특징이 아니라 <b>맞춤 코칭의 출발점</b>입니다.</div></div>
+        <div class="hint"><span class="emoji">🎁</span><div>결과 페이지에서 <b>추천 공부 루틴</b>과 <b>코칭 포인트</b>를 제공합니다.</div></div>
+      </div>
+      <div class="grid">
+        <label for="username" class="badge">이름 또는 닉네임</label>
+        <input id="username" type="text" placeholder="예: 민준 / Hwashin" />
+        <button id="startBtn" class="btn" disabled>시작하기</button>
+        <small class="subtitle">버튼이 비활성화되어 있으면 이름을 먼저 입력하세요.</small>
+      </div>
+    </section>
+
+    <!-- Quiz Section -->
+    <section id="quiz" class="card hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="badge">문항 <span id="qIndex">1</span>/<span id="qTotal">0</span></div>
+        <div class="badge hidden" id="axisBadge"></div>
+      </div>
+      <div class="progress" aria-hidden="true"><div id="progressBar"></div></div>
+      <div id="qWrap" class="q" style="margin:14px 0"></div>
+      <div style="display:flex;gap:10px;justify-content:space-between">
+        <button id="prevBtn" class="btn secondary">이전</button>
+        <button id="nextBtn" class="btn">다음</button>
+      </div>
+    </section>
+
+    <!-- Result Section -->
+    <section id="result" class="card hidden">
+      <div class="result-card" id="resultInner">
+        <div class="badge">응시자: <span id="resName"></span></div>
+        <div class="result-type" id="resType">유형</div>
+        <div id="resAxisRows"></div>
+
+        <!-- ↓↓↓ 여기부터 코칭 섹션만 블러 처리 ↓↓↓ -->
+        <div class="blur-wrap" id="coachWrap" style="margin-top:12px">
+          <div class="is-blurred" id="coachInner">
+            <h3 style="margin:0 0 8px;font-size:16px">우리 아이를 위한 학습 코칭</h3>
+            <p id="resSummary" class="subtitle"></p>
+            <div class="card" style="background:rgba(255,255,255,0.02);border-radius:var(--radius);padding:16px">
+              <h3 style="margin:0 0 8px;font-size:16px">간단 조언 (요약)</h3>
+              <div class="grid" style="grid-template-columns:1fr;gap:10px">
+                <div>
+                  <div class="subtitle" style="font-size:12px">강점</div>
+                  <ul id="resStrength" style="margin:6px 0 0 18px; padding:0"></ul>
+                </div>
+                <div>
+                  <div class="subtitle" style="font-size:12px">주의</div>
+                  <ul id="resCaution" style="margin:6px 0 0 18px; padding:0"></ul>
+                </div>
+                <div>
+                  <div class="subtitle" style="font-size:12px">코칭 (자기주도)</div>
+                  <ul id="resCoaching" style="margin:6px 0 0 18px; padding:0"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 배경 블러 오버레이 (내용 없음 / 폼은 아래 흰 카드로 별도 표시) -->
+          <div class="blur-cover" id="resultOverlay"></div>
+          <!-- 흰색 상담 신청 카드: 블러 영역 위 중앙 배치 -->
+          <div class="lead-card" id="leadCard">
+            <h3>상담 신청</h3>
+            <p class="subtitle" style="margin-bottom:8px">막대 그래프 아래 요약 본문은 상담 승인 후 공개됩니다.</p>
+            <form id="leadForm" class="grid" style="grid-template-columns:1fr;gap:10px;text-align:left">
+              <div class="field"><label class="badge" for="pfName">보호자 성함</label>
+              <input id="pfName" type="text" placeholder="예: 김보호자" required></div>
+
+              <div class="field"><label class="badge" for="pfPhone">연락처</label>
+              <input id="pfPhone" type="tel" placeholder="예: 010-1234-5678" required></div>
+
+              <div class="field"><label class="badge" for="pfGrade">자녀 학년</label>
+              <select id="pfGrade">
+                <option value="">선택</option>
+                <option>초1</option><option>초2</option><option>초3</option><option>초4</option><option>초5</option><option>초6</option>
+                <option>중1</option><option>중2</option><option>중3</option>
+                <option>고1</option><option>고2</option><option>고3</option>
+              </select></div>
+
+              <label class="badge">선호 상담 방법</label>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <label class="pill"><input type="radio" name="pfChannel" value="전화" checked> 전화</label>
+                <label class="pill"><input type="radio" name="pfChannel" value="카카오톡"> 카카오톡</label>
+                <label class="pill"><input type="radio" name="pfChannel" value="방문"> 방문</label>
+              </div>
+
+              <div class="field"><label class="badge" for="pfTime">상담 가능 시간(선택)</label>
+              <input id="pfTime" type="text" placeholder="예: 평일 14-18시, 주말 오전 등"></div>
+
+              <label style="display:flex;gap:8px;align-items:flex-start">
+                <input id="pfAgree" type="checkbox" required>
+                <span class="subtitle">(필수) 입력하신 정보는 상담 연락 및 결과 안내에만 사용됩니다.</span>
+              </label>
+
+              <button type="submit" class="btn" id="leadSubmit">상담 요청하고 메일로 결과지 받기</button>
+              <a href="tel:010-2380-0402" class="btn secondary" style="text-align:center">전화 연결 (010-2380-0402)</a>
+            </form>
+            <div class="grid" style="grid-template-columns:1fr;gap:8px;margin-top:12px">
+              <label class="badge" for="approveCode">상담사 승인코드</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input id="approveCode" type="password" placeholder="코드 입력" style="flex:1">
+                <button type="button" class="btn secondary" id="approveBtn">승인</button>
+              </div>
+              <small class="subtitle" style="color:#334155">상담사가 승인하면 코칭 요약이 공개됩니다.</small>
+            </div>
+          </div>
+        </div>
+        <!-- ↑↑↑ 블러 처리 끝 ↑↑↑ -->
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+          <button class="btn" id="retryBtn">다시 하기</button>
+          <button class="btn secondary" id="exportBtn">결과 저장(JSON)</button>
+        </div>
+        <details style="margin-top:10px"><summary class="badge">내장 테스트 결과 (개발용)</summary><pre id="testOutput" style="white-space:pre-wrap"></pre></details>
+      </div>
+    </section>
+
+    <footer>© Edufisher — 16가지 학습성향 검사 템플릿 · 단일 HTML 파일 · 로컬에서 바로 작동</footer>
+  </div>
+
+<script>
+/**********************
+ * 에듀피셔 16유형 템플릿 설정
+ **********************/
+const CONFIG={
+ axes:[
+  {id:"IMM_EXP",left:"몰입",right:"탐험",abbrL:"몰",abbrR:"탐"},
+  {id:"PLAN_SPONT",left:"계획",right:"즉흥",abbrL:"계",abbrR:"즉"},
+  {id:"CREATE_REAL",left:"창의",right:"현실",abbrL:"창",abbrR:"현"},
+  {id:"PERFECT_EMO",left:"완벽",right:"감정",abbrL:"완",abbrR:"감"}
+ ],
+ TYPE_MAP:{},
+ questions:[
+  // IMM_EXP (23)
+  {axis:"IMM_EXP",a:"숙제를 시작하면 끝까지 해야 마음이 편해요.",b:"하다가 지루하면 다른 걸 먼저 해요."},
+  {axis:"IMM_EXP",a:"책을 읽으면 마지막까지 다 읽어요.",b:"재미있는 부분만 읽고 넘어가요."},
+  {axis:"IMM_EXP",a:"한 게임을 오래 해요.",b:"여러 게임을 번갈아 하며 즐겨요."},
+  {axis:"IMM_EXP",a:"공부할 때 시간 가는 줄 몰라요.",b:"조금 하다가 쉬는 걸 자주 해요."},
+  {axis:"IMM_EXP",a:"같은 문제를 여러 번 풀어도 괜찮아요.",b:"새로운 문제가 더 재미있어요."},
+  {axis:"IMM_EXP",a:"그림을 한 장 완성할 때까지 집중해요.",b:"여러 그림을 조금씩 그려요."},
+  {axis:"IMM_EXP",a:"좋아하는 주제는 계속 찾아봐요.",b:"다양한 주제를 조금씩 알아봐요."},
+  {axis:"IMM_EXP",a:"한 가지를 깊이 배우는 게 좋아요.",b:"여러 가지를 넓게 배우는 게 좋아요."},
+  {axis:"IMM_EXP",a:"새로운 걸 배우면 더 알고 싶어요.",b:"배운 걸 다른 데 써보는 게 더 재미있어요."},
+  {axis:"IMM_EXP",a:"몰입하면 주변이 안 보여요.",b:"공부하다가도 딴생각이 자주 나요."},
+  {axis:"IMM_EXP",a:"끝까지 다 해야 속이 시원해요.",b:"조금만 해도 괜찮아요."},
+  {axis:"IMM_EXP",a:"좋아하는 건 질리지 않아요.",b:"금방 질려요."},
+  {axis:"IMM_EXP",a:"집중하면 오래 버틸 수 있어요.",b:"조금만 해도 금방 피곤해요."},
+  {axis:"IMM_EXP",a:"한 가지에 빠지면 다른 건 안 보여요.",b:"여러 걸 동시에 하는 게 좋아요."},
+  {axis:"IMM_EXP",a:"끝까지 해내면 뿌듯해요.",b:"새로운 걸 시작할 때가 더 설레요."},
+  {axis:"IMM_EXP",a:"반복해서 하는 게 좋아요.",b:"새로운 걸 자주 바꾸는 게 좋아요."},
+  {axis:"IMM_EXP",a:"집중할 땐 누가 불러도 몰라요.",b:"조금만 소리 나도 집중이 깨져요."},
+  {axis:"IMM_EXP",a:"하던 걸 완성하고 넘어가요.",b:"중간에 다른 걸 먼저 해요."},
+  {axis:"IMM_EXP",a:"같은 노래를 여러 번 들어도 좋아요.",b:"새 노래가 더 좋아요."},
+  {axis:"IMM_EXP",a:"게임에서 최고 점수를 꼭 찍고 싶어요.",b:"새로운 레벨을 시도해보는 게 더 신나요."},
+  {axis:"IMM_EXP",a:"정리할 때 한 곳을 끝내고 다음으로 가요.",b:"여기저기 조금씩 정리해요."},
+  {axis:"IMM_EXP",a:"하나를 깊게 아는 게 좋아요.",b:"여러 걸 조금씩 아는 게 좋아요."},
+  {axis:"IMM_EXP",a:"몰두하면 시간이 순식간에 가요.",b:"자주 다른 생각이 떠올라요."},
+  // PLAN_SPONT (23)
+  {axis:"PLAN_SPONT",a:"공부 순서를 미리 정해요.",b:"공부하면서 그때그때 정해요."},
+  {axis:"PLAN_SPONT",a:"일정을 세워두면 마음이 편해요.",b:"그날 기분에 따라 하는 게 좋아요."},
+  {axis:"PLAN_SPONT",a:"내일 할 일을 미리 준비해요.",b:"내일 아침에 바로 해요."},
+  {axis:"PLAN_SPONT",a:"계획대로 움직이는 게 좋아요.",b:"즉흥적으로 하는 게 더 신나요."},
+  {axis:"PLAN_SPONT",a:"시험공부는 며칠 전부터 나눠서 해요.",b:"전날 몰아서 하면 더 집중돼요."},
+  {axis:"PLAN_SPONT",a:"약속 시간을 꼭 지켜요.",b:"조금 늦어도 괜찮다고 생각해요."},
+  {axis:"PLAN_SPONT",a:"가방을 전날 챙겨요.",b:"아침에 급하게 챙겨요."},
+  {axis:"PLAN_SPONT",a:"숙제를 미리 해두는 게 편해요.",b:"마감 전에 한 번에 하는 게 편해요."},
+  {axis:"PLAN_SPONT",a:"공부할 때 순서를 정해둬요.",b:"생각나는 것부터 해요."},
+  {axis:"PLAN_SPONT",a:"하루를 계획대로 보내면 뿌듯해요.",b:"계획 없이 자유로운 게 좋아요."},
+  {axis:"PLAN_SPONT",a:"새로운 계획 세우는 걸 좋아해요.",b:"그때그때 하고 싶은 걸 해요."},
+  {axis:"PLAN_SPONT",a:"시험 일정표를 미리 확인해요.",b:"시험 다가오면 그때 확인해요."},
+  {axis:"PLAN_SPONT",a:"일주일 계획을 세워요.",b:"오늘 하루만 생각해요."},
+  {axis:"PLAN_SPONT",a:"정리정돈이 잘 돼야 집중돼요.",b:"조금 어수선해도 괜찮아요."},
+  {axis:"PLAN_SPONT",a:"해야 할 일을 순서대로 해요.",b:"중간에 마음이 가는 걸 먼저 해요."},
+  {axis:"PLAN_SPONT",a:"공부 시간표를 만들어둬요.",b:"그때그때 시간 맞춰 해요."},
+  {axis:"PLAN_SPONT",a:"주말 계획도 미리 정해요.",b:"즉흥적으로 놀아요."},
+  {axis:"PLAN_SPONT",a:"정리된 책상이 좋아요.",b:"조금 어질러져도 편해요."},
+  {axis:"PLAN_SPONT",a:"목표를 세우고 차근차근 해요.",b:"하다 보면 목표가 생겨요."},
+  {axis:"PLAN_SPONT",a:"시간 약속을 잘 지켜요.",b:"늦어도 괜찮아요."},
+  {axis:"PLAN_SPONT",a:"계획이 바뀌면 불편해요.",b:"바뀌면 새로 하면 돼요."},
+  {axis:"PLAN_SPONT",a:"계획표를 채우는 게 재미있어요.",b:"계획표는 잘 안 써요."},
+  {axis:"PLAN_SPONT",a:"정해진 루틴이 좋아요.",b:"매일 다르게 하는 게 좋아요."},
+  // CREATE_REAL (23)
+  {axis:"CREATE_REAL",a:"새로운 놀이를 직접 만들어봐요.",b:"이미 있는 놀이를 잘해요."},
+  {axis:"CREATE_REAL",a:"상상하는 걸 좋아해요.",b:"실제로 있는 걸 보는 게 좋아요."},
+  {axis:"CREATE_REAL",a:"색연필로 꾸미는 걸 좋아해요.",b:"깔끔한 흑백 정리가 좋아요."},
+  {axis:"CREATE_REAL",a:"내 방식대로 해보는 게 좋아요.",b:"선생님이 알려준 대로 해요."},
+  {axis:"CREATE_REAL",a:"다른 생각을 떠올리는 게 재밌어요.",b:"정답을 찾는 게 재밌어요."},
+  {axis:"CREATE_REAL",a:"새로운 방법을 시도해봐요.",b:"익숙한 방법이 편해요."},
+  {axis:"CREATE_REAL",a:"꿈꾸는 걸 좋아해요.",b:"지금 할 일을 먼저 해요."},
+  {axis:"CREATE_REAL",a:"상상 속 이야기를 만들어요.",b:"실제 이야기 듣는 걸 좋아해요."},
+  {axis:"CREATE_REAL",a:"규칙을 바꿔보는 걸 좋아해요.",b:"규칙을 지키는 게 좋아요."},
+  {axis:"CREATE_REAL",a:"그림 그릴 때 내 마음대로 색을 써요.",b:"실제 모습대로 색을 써요."},
+  {axis:"CREATE_REAL",a:"새로운 아이디어가 자주 떠올라요.",b:"배운 걸 그대로 써요."},
+  {axis:"CREATE_REAL",a:"상상을 글로 쓰는 게 좋아요.",b:"사실을 적는 게 좋아요."},
+  {axis:"CREATE_REAL",a:"재밌는 상상을 많이 해요.",b:"현실적인 얘기를 좋아해요."},
+  {axis:"CREATE_REAL",a:"그림 그릴 때 꾸며요.",b:"있는 그대로 그려요."},
+  {axis:"CREATE_REAL",a:"새로운 걸 만들고 싶어요.",b:"잘 되는 걸 반복하고 싶어요."},
+  {axis:"CREATE_REAL",a:"상상한 걸 실제로 만들어봐요.",b:"그림으로만 남겨요."},
+  {axis:"CREATE_REAL",a:"창의적인 게 멋있어요.",b:"실용적인 게 멋있어요."},
+  {axis:"CREATE_REAL",a:"색다른 걸 좋아해요.",b:"익숙한 게 좋아요."},
+  {axis:"CREATE_REAL",a:"새로운 규칙을 만들어봐요.",b:"원래 규칙을 잘 지켜요."},
+  {axis:"CREATE_REAL",a:"내 생각을 그림이나 말로 표현해요.",b:"필요한 말만 해요."},
+  {axis:"CREATE_REAL",a:"상상 속 세계를 자주 떠올려요.",b:"실제 세상을 더 많이 봐요."},
+  {axis:"CREATE_REAL",a:"새로운 아이디어 얘기 듣는 게 좋아요.",b:"검증된 얘기가 더 좋아요."},
+  {axis:"CREATE_REAL",a:"직접 발명해보는 걸 좋아해요.",b:"만들어진 걸 사용하는 게 좋아요."},
+  // PERFECT_EMO (23)
+  {axis:"PERFECT_EMO",a:"틀리면 다시 고쳐요.",b:"틀려도 괜찮아요."},
+  {axis:"PERFECT_EMO",a:"정확하게 하려고 노력해요.",b:"기분 좋게 하는 게 더 중요해요."},
+  {axis:"PERFECT_EMO",a:"결과보다 과정이 중요해요.",b:"기분이 좋으면 결과도 좋아요."},
+  {axis:"PERFECT_EMO",a:"글씨를 예쁘게 써요.",b:"빨리 쓰는 게 더 중요해요."},
+  {axis:"PERFECT_EMO",a:"틀린 문제를 다시 풀어요.",b:"틀린 건 그냥 넘어가요."},
+  {axis:"PERFECT_EMO",a:"완벽하게 하려 해요.",b:"대충 해도 괜찮아요."},
+  {axis:"PERFECT_EMO",a:"실수를 고치는 게 재미있어요.",b:"새로운 걸 하는 게 더 좋아요."},
+  {axis:"PERFECT_EMO",a:"다시 확인해요.",b:"한 번 보면 끝이에요."},
+  {axis:"PERFECT_EMO",a:"잘하고 싶다는 마음이 커요.",b:"기분 좋게 하고 싶어요."},
+  {axis:"PERFECT_EMO",a:"내가 틀리면 속상해요.",b:"괜찮다고 생각해요."},
+  {axis:"PERFECT_EMO",a:"실수하면 바로 고쳐요.",b:"다음엔 잘하면 된다고 생각해요."},
+  {axis:"PERFECT_EMO",a:"잘못되면 처음부터 다시 해요.",b:"그냥 이어서 해요."},
+  {axis:"PERFECT_EMO",a:"발표 전에 여러 번 연습해요.",b:"그때그때 말해요."},
+  {axis:"PERFECT_EMO",a:"정답을 꼭 찾아야 해요.",b:"정답보다 과정이 재밌어요."},
+  {axis:"PERFECT_EMO",a:"잘한 일은 계속 생각나요.",b:"재밌었던 일이 더 기억나요."},
+  {axis:"PERFECT_EMO",a:"실패하면 기분이 안 좋아요.",b:"다음에 잘하면 돼요."},
+  {axis:"PERFECT_EMO",a:"칭찬보다 피드백이 더 좋아요.",b:"칭찬이 더 힘이 나요."},
+  {axis:"PERFECT_EMO",a:"완벽하게 끝내야 마음이 편해요.",b:"감정이 좋아야 집중돼요."},
+  {axis:"PERFECT_EMO",a:"결과를 꼭 확인해요.",b:"느낌으로 알아요."},
+  {axis:"PERFECT_EMO",a:"점수에 민감해요.",b:"기분이 좋으면 괜찮아요."},
+  {axis:"PERFECT_EMO",a:"성공하면 행복해요.",b:"재밌으면 행복해요."},
+  {axis:"PERFECT_EMO",a:"계획한 대로 안 되면 속상해요.",b:"기분이 좋으면 괜찮아요."},
+  {axis:"PERFECT_EMO",a:"틀린 걸 보면 바로 고쳐요.",b:"틀려도 웃어요."}
+ ]
+};
+
+/*********** 상태 & 엘리먼트 ***********/
+const state={ idx:0, answers:{}, name:"" };
+const el={
+  intro:document.getElementById('intro'),
+  quiz:document.getElementById('quiz'),
+  result:document.getElementById('result'),
+  startBtn:document.getElementById('startBtn'),
+  nextBtn:document.getElementById('nextBtn'),
+  prevBtn:document.getElementById('prevBtn'),
+  username:document.getElementById('username'),
+  qWrap:document.getElementById('qWrap'),
+  qIndex:document.getElementById('qIndex'),
+  qTotal:document.getElementById('qTotal'),
+  progressBar:document.getElementById('progressBar'),
+  axisBadge:document.getElementById('axisBadge'),
+  resName:document.getElementById('resName'),
+  resType:document.getElementById('resType'),
+  resAxisRows:document.getElementById('resAxisRows'),
+  resSummary:document.getElementById('resSummary'),
+  resStrength:document.getElementById('resStrength'),
+  resCaution:document.getElementById('resCaution'),
+  resCoaching:document.getElementById('resCoaching'),
+  retryBtn:document.getElementById('retryBtn'),
+  exportBtn:document.getElementById('exportBtn'),
+  testOutput:document.getElementById('testOutput'),
+  overlay:document.getElementById('resultOverlay'),
+  coachInner:document.getElementById('coachInner'),
+  leadForm:document.getElementById('leadForm'),
+  approveBtn:document.getElementById('approveBtn'),
+  approveCode:document.getElementById('approveCode')
+};
+
+// 원하는 축/질문 순서 강제
+const AXIS_ORDER = ["IMM_EXP","PLAN_SPONT","CREATE_REAL","PERFECT_EMO"];
+CONFIG.axes.sort((a,b)=>AXIS_ORDER.indexOf(a.id)-AXIS_ORDER.indexOf(b.id));
+CONFIG.questions.forEach((q,i)=>{ if(!q.id) q.id=i+1; });
+CONFIG.questions.sort((a,b)=>AXIS_ORDER.indexOf(a.axis)-AXIS_ORDER.indexOf(b.axis));
+
+el.qTotal.textContent = CONFIG.questions.length;
+
+/*********** 이벤트 ***********/
+function updateStartBtn(){
+  const hasName = !!el.username.value.trim();
+  el.startBtn.disabled = !hasName;
+}
+el.username.addEventListener('input', updateStartBtn);
+el.username.addEventListener('change', updateStartBtn);
+el.username.addEventListener('keyup', updateStartBtn);
+el.username.addEventListener('blur', updateStartBtn);
+// Enter로 바로 시작
+el.username.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !el.startBtn.disabled){ el.startBtn.click(); } });
+// 초기 상태 동기화
+updateStartBtn();
+
+el.startBtn.addEventListener('click',()=>{ state.name = el.username.value.trim(); el.intro.classList.add('hidden'); el.quiz.classList.remove('hidden'); state.idx = 0; state.answers={}; renderQuestion(); });
+el.prevBtn.addEventListener('click',()=>{ if(state.idx>0){ state.idx--; renderQuestion(); }});
+el.nextBtn.addEventListener('click',()=>{
+  const q = CONFIG.questions[state.idx];
+  const checked = el.qWrap.querySelector('input[name="a"]:checked');
+  if(!checked){ alert('선택해주세요.'); return; }
+  state.answers[q.id]=Number(checked.value);
+  if(state.idx<CONFIG.questions.length-1){ state.idx++; renderQuestion(); }
+  else { computeResult(); }
+});
+el.retryBtn.addEventListener('click',()=>{ el.result.classList.add('hidden'); el.intro.classList.remove('hidden'); el.username.focus(); });
+el.exportBtn.addEventListener('click',()=>{
+  const blob = new Blob([
+    JSON.stringify({name:state.name, result:lastResult, answers:state.answers, date:new Date().toISOString()},null,2)
+  ], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `edufisher-16type-${Date.now()}.json`; a.click();
+  URL.revokeObjectURL(url);
+});
+
+/*********** 렌더 ***********/
+function renderQuestion(){
+  const q = CONFIG.questions[state.idx];
+  el.qIndex.textContent = state.idx+1;
+  el.progressBar.style.width = (((state.idx)/CONFIG.questions.length)*100).toFixed(1)+'%';
+  const prev = state.answers[q.id]||0;
+  el.qWrap.innerHTML = `
+    <h3>두 문장 중 더 나에게 가까운 것을 고르세요.</h3>
+    <div class="choice-wrap">
+      <label><input type="radio" name="a" value="5" ${prev===5?'checked':''}/> ${q.a||''}</label>
+      <label><input type="radio" name="a" value="1" ${prev===1?'checked':''}/> ${q.b||''}</label>
+    </div>
+  `;
+}
+
+/*********** 공통 계산 로직 (순수 함수) ***********/
+function deriveKeyFromAnswers(answers){
+  const axisScores = CONFIG.axes.reduce((acc,a)=>{ acc[a.id]={sum:0,count:0}; return acc; },{});
+  CONFIG.questions.forEach(q=>{
+    const v = (answers[q.id] ?? 3);
+    const weight = (v-3)/2;               // -1..+1 (A=5 → +1, B=1 → -1)
+    const sign = +1;                      // 항상 왼쪽 진술이 왼쪽 극
+    axisScores[q.axis].sum += sign * weight;
+    axisScores[q.axis].count++;
+  });
+  const key = CONFIG.axes.map(a=>{
+    const s = axisScores[a.id];
+    const avg = s.sum / Math.max(1,s.count); // -1..+1
+    const leftPct = Math.round((avg + 1) * 50);
+    return leftPct>=50 ? 'L' : 'R';
+  }).join('');
+  return {key, axisScores};
+}
+
+/*********** 결과 계산 ***********/
+let lastResult=null;
+function computeResult(){
+  const {key, axisScores} = deriveKeyFromAnswers(state.answers);
+  const polar = CONFIG.axes.map(a=>{
+    const s = axisScores[a.id];
+    const avg = s.sum / Math.max(1,s.count);
+    const leftPct = Math.round((avg + 1) * 50);
+    const rightPct = 100 - leftPct;
+    const side = leftPct>=rightPct ? 'L' : 'R';
+    return {axis:a, side, leftPct, rightPct, intensity:calcIntensity(leftPct,rightPct)};
+  });
+  const info = (CONFIG.TYPE_MAP && CONFIG.TYPE_MAP[key]) || makeGenericType(polar);
+  lastResult = { key, info, polar };
+  showResult(lastResult);
+}
+
+function makeGenericType(polar){
+  const name = polar.map(p=> p.side==='L'? p.axis.abbrL : p.axis.abbrR ).join('·');
+  return {
+    name, summary:"축약형 조합으로 결과가 표시됩니다. 에듀피셔 전용 설명문을 TYPE_MAP에 추가하세요.",
+    strength:["강점을 여기에"], caution:["주의점을 여기에"],
+    routine:["루틴 예시"], coaching:["코칭 포인트"], tools:["도구/앱"]
+  };
+}
+
+function showResult(res){
+  el.quiz.classList.add('hidden');
+  el.result.classList.remove('hidden');
+  el.resName.textContent = state.name;
+  // 유형 코드는 숨김: (LLLL) 표시 제거
+  el.resType.textContent = res.info.name;
+  el.resSummary.textContent = res.info.summary;
+  // 축 바(막대) 렌더
+  el.resAxisRows.innerHTML = '';
+  res.polar.forEach(p=> renderAxisRow(el.resAxisRows, p.axis.left, p.axis.right, p.leftPct, p.rightPct));
+  // 요약 팁 - 각 2개만
+  const tips = buildTips(res.key);
+  fillList(el.resStrength, tips.strength);
+  fillList(el.resCaution, tips.caution);
+  fillList(el.resCoaching, tips.coaching);
+}
+
+/*********** 유틸리티 ***********/
+function fillList(ul, arr){ ul.innerHTML=''; (arr||[]).forEach(t=>{ const li=document.createElement('li'); li.textContent=t; ul.appendChild(li); }); }
+function calcIntensity(left,right){const d=Math.max(left,right);return d>=70?"뚜렷":d>=55?"중간":"균형";}
+function renderAxisRow(container,lblL,lblR,l,r){
+  const row=document.createElement('div');
+  row.innerHTML=`<div style='display:flex;justify-content:space-between'><span>${lblL}</span><span>${lblR}</span></div>
+  <div class='axis-bar'>
+    <div class='axis-left' style='width:${l}%'>${lblL} ${l}%</div>
+    <div class='axis-right' style='width:${r}%'>${lblR} ${r}%</div>
+    <div class='axis-midline'></div>
+  </div>
+  <div class='axis-foot'>
+    <span class='axis-chip axis-flag'>선호: ${l>=r?lblL:lblR}</span>
+    <span class='axis-chip'>분포: ${l}% / ${r}%</span>
+    <span class='axis-chip'>강도: ${calcIntensity(l,r)}</span>
+  </div>`;
+  container.appendChild(row);
+}
+function buildTips(code){
+  const t={strength:[],caution:[],coaching:[]};
+  // 1) 몰입↔탐험
+  if(code[0]==='L'){t.strength.push('깊게 파고드는 집중력이 좋아요'); t.caution.push('한 방향으로만 생각하기 쉬워요'); t.coaching.push('한 주에 한 번은 새로운 자료를 스스로 찾아보기');}
+  else{t.strength.push('호기심이 많아 배움의 폭이 넓어요'); t.caution.push('집중이 쉽게 분산될 수 있어요'); t.coaching.push('오늘의 한 주제만 정해 20분 집중하기');}
+  // 2) 계획↔즉흥
+  if(code[1]==='L'){t.strength.push('목표를 세우고 꾸준히 가는 힘이 있어요'); t.caution.push('계획에 묶여 융통성이 떨어질 수 있어요'); t.coaching.push('계획표에 “유연한 시간” 10% 넣기');}
+  else{t.strength.push('시도를 즐겨 배움에 활기를 더해요'); t.caution.push('준비 부족으로 실수가 생길 수 있어요'); t.coaching.push('하루 시작 전에 3줄 계획 메모하기');}
+  // 3) 창의↔현실
+  if(code[2]==='L'){t.caution.push('현실적 제약을 간과할 수 있어요'); t.coaching.push('아이디어 1개를 실제로 만들어 보기');}
+  else{t.caution.push('새로운 시도를 망설일 수 있어요'); t.coaching.push('평소와 다른 방식으로 문제 해결 도전');}
+  // 4) 완벽↔감정
+  if(code[3]==='L'){t.caution.push('완벽 추구로 속도가 느려질 수 있어요'); t.coaching.push('“완벽보다 완성” 체크박스로 마무리');}
+  else{t.caution.push('기분에 따라 집중력이 흔들릴 수 있어요'); t.coaching.push('감정이 흔들릴 때 2분 호흡 후 재시작');}
+  return { strength:t.strength.slice(0,2), caution:t.caution.slice(0,2), coaching:t.coaching.slice(0,2) };
+}
+
+/*********** 리드 수집 & 승인 공개 ***********/
+const APPROVE_CODE = '0402';
+(function attachLeadHandlers(){
+  if(el.leadForm){
+    el.leadForm.addEventListener('submit',(e)=>{
+      e.preventDefault();
+      const name = (document.getElementById('pfName').value||'').trim();
+      const phone = (document.getElementById('pfPhone').value||'').trim();
+      const grade = document.getElementById('pfGrade').value||'';
+      const time = (document.getElementById('pfTime').value||'').trim();
+      const agree = document.getElementById('pfAgree').checked;
+      const channel = (el.leadForm.querySelector('input[name="pfChannel"]:checked')||{value:'전화'}).value;
+      if(!name || !phone || !agree){ alert('성함, 연락처, 동의는 필수입니다.'); return; }
+
+      const when = new Date().toLocaleString();
+      const lines = [
+        '[상담 요청 — 에듀피셔 16가지 학습성향]',
+        `보호자: ${name}`,
+        `연락처: ${phone}`,
+        `자녀 학년: ${grade||'미입력'}`,
+        `선호 상담: ${channel}`,
+        `가능 시간: ${time||'미입력'}`,
+        `요청 시각: ${when}`,
+        '',
+        '— 검사 요약 —'
+      ];
+      if(window.lastResult){
+        lines.push(`수험자: ${state.name||'무기명'}`);
+        window.lastResult.polar.forEach(p=>{
+          const prefer = p.leftPct>=p.rightPct ? p.axis.left : p.axis.right;
+          lines.push(`· ${p.axis.left} ${p.leftPct}% / ${p.axis.right} ${p.rightPct}% (선호: ${prefer})`);
+        });
+      }
+      const subject = encodeURIComponent(`[상담요청] ${name} — ${state.name||'무기명'}`);
+      const body = encodeURIComponent(lines.join('\n'));
+      window.location.href = `mailto:edufisher@naver.com?subject=${subject}&body=${body}`;
+
+      // 공개 보류: 오버레이 문구만 갱신
+      if(el.overlay){
+        const box = el.overlay.querySelector('.overlay-box');
+        if(box){
+          box.querySelector('h3').textContent = '상담사 승인 대기 중';
+          const p = box.querySelector('p.subtitle') || box.querySelector('p');
+          if(p) p.textContent = '상담사가 확인 후 승인하면 코칭 결과가 공개됩니다.';
+        }
+      }
+    });
+  }
+  if(el.approveBtn){
+    el.approveBtn.addEventListener('click',()=>{
+      const code = (el.approveCode.value||'').trim();
+      if(code===APPROVE_CODE){
+        if(el.coachInner){ el.coachInner.classList.remove('is-blurred'); }
+        if(el.overlay){ el.overlay.style.display='none'; }
+      }else{
+        alert('승인코드가 올바르지 않습니다.');
+      }
+    });
+  }
+})();
+
+/*********** 내장 테스트 (기존 테스트 존중 + 추가 TC) ***********/
+(function runEmbeddedTests(){
+  const logs=[]; const pass=(msg)=>logs.push('✅ '+msg); const fail=(msg)=>logs.push('❌ '+msg);
+  function simulateAll(val){ const answers={}; CONFIG.questions.forEach(q=> answers[q.id]=val); return deriveKeyFromAnswers(answers).key; }
+  function simulateByAxis(map){ const answers={}; CONFIG.questions.forEach(q=>{ answers[q.id] = map[q.axis] ?? 3; }); return deriveKeyFromAnswers(answers).key; }
+  try{
+    const k1 = simulateAll(5); if(k1==='LLLL') pass('TC1 모두 5 → LLLL'); else fail('TC1 예상 LLLL, 실제 '+k1);
+    const k2 = simulateAll(1); if(k2==='RRRR') pass('TC2 모두 1 → RRRR'); else fail('TC2 예상 RRRR, 실제 '+k2);
+    const k3 = simulateAll(3); if(k3==='LLLL') pass('TC3 모두 3 → 경계값 처리로 LLLL'); else fail('TC3 예상 LLLL(경계), 실제 '+k3);
+    const k4 = simulateByAxis({IMM_EXP:5, PLAN_SPONT:1, CREATE_REAL:1, PERFECT_EMO:1}); if(k4==='LRRR') pass('TC4 LRRR (첫 축만 5, 나머지 1)'); else fail('TC4 예상 LRRR, 실제 '+k4);
+    const k5 = simulateByAxis({IMM_EXP:1, PLAN_SPONT:5, CREATE_REAL:1, PERFECT_EMO:5}); if(k5==='RLRL') pass('TC5 RLRL (교차 값)'); else fail('TC5 예상 RLRL, 실제 '+k5);
+  }catch(e){ logs.push('❌ 테스트 실행 오류: '+e.message); }
+  const out = document.getElementById('testOutput'); if(out) out.textContent = logs.join('\n');
+})();
+// 상담 신청/승인 로직
+// APPROVE_CODE is declared above; reuse it here.
+(function leadFlow(){
+  const overlay = document.getElementById('resultOverlay');
+  const leadCard = document.getElementById('leadCard');
+  const coachInner = document.getElementById('coachInner');
+  const form = document.getElementById('leadForm');
+  const approveBtn = document.getElementById('approveBtn');
+  const approveCode = document.getElementById('approveCode');
+  if(form){
+    form.addEventListener('submit',(e)=>{
+      e.preventDefault();
+      const name = (document.getElementById('pfName').value||'').trim();
+      const phone = (document.getElementById('pfPhone').value||'').trim();
+      const grade = document.getElementById('pfGrade').value||'';
+      const time = (document.getElementById('pfTime').value||'').trim();
+      const agree = document.getElementById('pfAgree').checked;
+      const channel = (form.querySelector('input[name="pfChannel"]:checked')||{value:'전화'}).value;
+      if(!name || !phone || !agree){ alert('성함, 연락처, 동의는 필수입니다.'); return; }
+
+      const when = new Date().toLocaleString();
+      const lines = [
+        '[상담 요청 — 에듀피셔 16가지 학습성향]',
+        `보호자: ${name}`,
+        `연락처: ${phone}`,
+        `자녀 학년: ${grade||'미입력'}`,
+        `선호 상담: ${channel}`,
+        `가능 시간: ${time||'미입력'}`,
+        `요청 시각: ${when}`,
+        '',
+        '— 검사 요약 —'
+      ];
+      if(window.lastResult){
+        lines.push(`수험자: ${state.name||'무기명'}`);
+        window.lastResult.polar.forEach(p=>{
+          const prefer = p.leftPct>=p.rightPct ? p.axis.left : p.axis.right;
+          lines.push(`· ${p.axis.left} ${p.leftPct}% / ${p.axis.right} ${p.rightPct}% (선호: ${prefer})`);
+        });
+      }
+      const subject = encodeURIComponent(`[상담요청] ${name} — ${state.name||'무기명'}`);
+      const body = encodeURIComponent(lines.join('\n'));
+      window.location.href = `mailto:edufisher@naver.com?subject=${subject}&body=${body}`;
+
+      // 제출 후에도 비공개 유지. 카드 텍스트 갱신
+      const h3 = leadCard.querySelector('h3'); if(h3) h3.textContent='상담사 승인 대기 중';
+      const p = leadCard.querySelector('p'); if(p) p.textContent='상담사가 확인 후 승인하면 코칭 요약이 공개됩니다.';
+    });
+  }
+  if(approveBtn){
+    approveBtn.addEventListener('click',()=>{
+      const code = (approveCode.value||'').trim();
+      if(code===APPROVE_CODE){
+        if(coachInner) coachInner.classList.remove('is-blurred');
+        if(overlay) overlay.style.display='none';
+        if(leadCard) leadCard.style.display='none';
+      }else{
+        alert('승인코드가 올바르지 않습니다.');
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>
